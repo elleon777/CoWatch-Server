@@ -6,6 +6,8 @@ var io = require('socket.io')(server, {
   },
 });
 
+const port = process.env.PORT || 9999;
+
 // Отслеживание url адреса и отображение нужной HTML страницы
 // app.get('/', function (request, respons) {
 //   respons.sendFile(__dirname + '/index.html');
@@ -31,6 +33,6 @@ io.on('connection', (socket) => {
 });
 
 
-server.listen(9999, () => {
-  console.log('connect to 9999 port');
+server.listen(port, () => {
+  console.log(`connect to ${port} port`);
 });
