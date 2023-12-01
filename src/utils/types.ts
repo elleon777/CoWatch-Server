@@ -1,7 +1,8 @@
+
 export interface User {
-  username: string
+  username: string;
 }
 
 export type Room = {
-  id: string
+  id: string;
 };
