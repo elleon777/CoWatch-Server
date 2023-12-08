@@ -1,12 +1,12 @@
 import * as socketio from 'socket.io';
-import { User } from '../utils/types';
-import { users } from '..';
+import { User } from '../models/user';
+import { TUser } from '../utils/types';
 
 export const registerAuthHandlers = (socket: socketio.Socket, io: socketio.Server) => {
-  socket.on('new login', (user: User) => {
-    if (!users.some((existingUser) => existingUser.username === user.username)) {
-      users.push(user);
-      io.emit('new user added', { users, newUser: user });
-    }
-  });
+  const authLogin = (user: TUser) => {
+    const newUser = new User(user.id, user.username);
+    newUser.save();
+  };
+
+  socket.on('auth:login', authLogin);
 };

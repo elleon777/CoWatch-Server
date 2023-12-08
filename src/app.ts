@@ -2,12 +2,12 @@ import express, { Express, Request, Response } from 'express';
 import * as http from 'http';
 import * as socketio from 'socket.io';
 import cors from 'cors';
+import bodyParser from 'body-parser';
 
-import { Room, User } from './utils/types';
+import { TRoom, TUser } from './utils/types';
 import { CLIENT_HOST, PORT } from './utils/config';
-import { registerRoomHandlers } from './handlers/roomHandler';
-import { registerPlayerHandlers } from './handlers/playerHandler';
-import { registerAuthHandlers } from './handlers/authHandler';
+import { registerAuthHandlers, registerPlayerHandlers, registerRoomHandlers } from './handlers';
+import { roomRouter, parserRouter } from './routes';
 
 const app: Express = express();
 
@@ -19,24 +19,22 @@ const io: socketio.Server = new socketio.Server(server, {
   },
 });
 
+app.use(bodyParser.json());
 app.use(cors());
 
-export let users: User[] = [];
-export let rooms = ['1', '2'];
-app.get('/api/users', (req: Request, res: Response) => {
-  console.log(users);
-  res.send(users);
-});
-app.get('/api/rooms', (req: Request, res: Response) => {
-  res.send(rooms);
-});
+// https://www.geeksforgeeks.org/how-to-manage-users-in-socket-io-in-node-js/
+
+export let users: TUser[] = [];
+
+app.use("/api/rooms", roomRouter)
+app.use("/api/parser", parserRouter)
 
 const onConnection = (socket: socketio.Socket) => {
   const { id } = socket;
   console.log('Успешное соединение', id);
+  registerAuthHandlers(socket, io);
   registerPlayerHandlers(socket, io);
   registerRoomHandlers(socket, io);
-  registerAuthHandlers(socket, io);
   socket.on('disconnect', () => {
     console.log('Отключился', id);
   });

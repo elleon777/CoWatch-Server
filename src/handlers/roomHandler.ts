@@ -1,15 +1,48 @@
 import * as socketio from 'socket.io';
-import { rooms } from "..";
+import { TUser } from '../utils/types';
+import { Room } from '../models/room';
+import { User } from '../models/user';
+
+//TODO leave room when close page
+type RoomArg = { roomId: string; userId: string };
 
 export const registerRoomHandlers = (socket: socketio.Socket, io: socketio.Server) => {
-  socket.on('createRoom', (roomId: string) => {
-    rooms.push(roomId);
-  });
+  const createRoom = (): void => {
+    const room = new Room();
+    room.save();
+    io.emit('rooms:update');
+    socket.emit('room:join', Room.getLastIndexRoom());
+  };
 
-  socket.on('joinRoom', (roomId: string) => {
-    socket.join(roomId);
-    console.log(socket.id, 'подключился к', roomId);
-  });
+  const joinRoom = ({ roomId, userId }: RoomArg): void => {
+    Room.addUserToRoom({ roomId, userId });
+    socket.join(String(roomId));
+    io.emit('room:updateUsers');
+  };
 
-  socket.on('leaveRoom', (roomId: string) => {});
+  const leaveRoom = ({ roomId, userId }: RoomArg): void => {
+    Room.leaveRoom({ roomId, userId }, () => {
+      io.emit('rooms:update');
+    });
+    socket.leave(String(roomId));
+    io.emit('room:updateUsers');
+  };
+  const disconnectRoom = (userId: string): void => {
+    const currentUser = User.findUser(userId);
+    if (currentUser?.currentRoomId) {
+      const roomId = currentUser?.currentRoomId;
+      Room.leaveRoom({ roomId, userId }, () => {
+        console.log('обновление комнат')
+        io.emit('rooms:update');
+      });
+      socket.leave(String(roomId));
+    }
+    User.leaveUser(userId);
+    io.emit('room:updateUsers');
+  };
+
+  socket.on('room:create', createRoom);
+  socket.on('room:join', joinRoom);
+  socket.on('room:leave', leaveRoom);
+  socket.on('disconnect', () => disconnectRoom(socket.id));
 };
