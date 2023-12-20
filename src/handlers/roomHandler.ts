@@ -1,7 +1,8 @@
 import * as socketio from 'socket.io';
 import { TUser } from '../utils/types';
-import { Room } from '../models/room';
-import { User } from '../models/user';
+import { Room } from '../models/Room';
+import { User } from '../models/User';
+import { RoomRole } from '../utils/enums';
 
 //TODO leave room when close page
 type RoomArg = { roomId: string; userId: string };
@@ -16,6 +17,7 @@ export const registerRoomHandlers = (socket: socketio.Socket, io: socketio.Serve
 
   const joinRoom = ({ roomId, userId }: RoomArg): void => {
     Room.addUserToRoom({ roomId, userId });
+    User.setRoomRole(socket.id);
     socket.join(String(roomId));
     io.emit('room:updateUsers');
   };
@@ -32,7 +34,7 @@ export const registerRoomHandlers = (socket: socketio.Socket, io: socketio.Serve
     if (currentUser?.currentRoomId) {
       const roomId = currentUser?.currentRoomId;
       Room.leaveRoom({ roomId, userId }, () => {
-        console.log('обновление комнат')
+        console.log('обновление комнат');
         io.emit('rooms:update');
       });
       socket.leave(String(roomId));

@@ -1,5 +1,5 @@
 import {  Request, Response } from 'express';
-import { Parser } from '../models/parser';
+import { Parser } from '../models/Parser';
 
 
 export const parserController = {

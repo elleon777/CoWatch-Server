@@ -1,5 +1,5 @@
 import * as socketio from 'socket.io';
-import { User } from '../models/user';
+import { User } from '../models/User';
 import { TUser } from '../utils/types';
 
 export const registerAuthHandlers = (socket: socketio.Socket, io: socketio.Server) => {

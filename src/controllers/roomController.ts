@@ -1,6 +1,6 @@
 import express, { Express, Request, Response } from 'express';
-import { Room } from '../models/room';
-import { User } from '../models/user';
+import { Room } from '../models/Room';
+import { User } from '../models/User';
 
 export const roomController = {
   getRooms: (req: Request, res: Response) => {

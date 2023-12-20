@@ -1,5 +1,5 @@
 import { TRoom, TUser } from '../utils/types';
-import { User } from './user';
+import { User } from './User';
 
 type RoomArg = { roomId: string; userId: string };
 
@@ -20,7 +20,6 @@ export class Room {
     rooms.push(this);
   }
 
-  // FIXME работает удаление комнаты когда там сидит один человек но если их 2 то комната не удаляется
   static findRoom(roomId: string): TRoom | undefined {
     const currentRoom = rooms.find((room) => room.id === roomId);
     if (!currentRoom) {
@@ -33,7 +32,7 @@ export class Room {
     User.setRoom(userId, roomId);
     const currentRoom = Room.findRoom(roomId);
     currentRoom?.usersId.push(userId);
-    console.log('добавлен пользователь',currentRoom?.usersId);
+    console.log('добавлен пользователь', currentRoom?.usersId);
   }
 
   // срабатывает два раза
