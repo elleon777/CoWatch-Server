@@ -11,4 +11,9 @@ export const roomController = {
     // console.log('usersFromRoom', usersFromRoom);
     res.status(200).send(usersFromRoom);
   },
+  getSourcesFromRoom: (req: Request, res: Response) => {
+    const sourcesFromRoom = Room.getSources(req.params.id);
+    // console.log('usersFromRoom', usersFromRoom);
+    res.status(200).send(sourcesFromRoom);
+  },
 };

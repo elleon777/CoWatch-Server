@@ -8,7 +8,7 @@ const rooms: TRoom[] = [];
 export class Room {
   id: string;
   usersId: string[];
-  currentSources: string | null;
+  currentSources: any | null;
 
   constructor() {
     this.id = String(rooms.length + 1);
@@ -32,6 +32,7 @@ export class Room {
     User.setRoom(userId, roomId);
     const currentRoom = Room.findRoom(roomId);
     currentRoom?.usersId.push(userId);
+    User.setRoomRole(userId);
     console.log('добавлен пользователь', currentRoom?.usersId);
   }
 
@@ -39,16 +40,18 @@ export class Room {
   static removeUserFromRoom({ roomId, userId }: RoomArg): void {
     const currentRoom = Room.findRoom(roomId);
     const currentUserIndex = currentRoom?.usersId.indexOf(userId);
-    console.log('before delete', currentRoom?.usersId);
     if (typeof currentUserIndex !== 'undefined') {
       currentRoom?.usersId.splice(currentUserIndex, 1);
-      console.log('after delete', currentRoom?.usersId);
+      User.setRoom(userId, null);
     }
   }
 
   static leaveRoom({ roomId, userId }: RoomArg, callback?: () => void): void {
+    console.log(userId, 'вышел из комнаты', roomId);
     const currentRoom = Room.findRoom(roomId);
+    User.removeRoomRole(userId);
     Room.removeUserFromRoom({ roomId, userId });
+    User.passHostRole(roomId);
     if (currentRoom?.usersId.length === 0) {
       Room.deleteRoom(roomId);
       if (callback) {
@@ -73,5 +76,22 @@ export class Room {
 
   static getAllRooms() {
     return rooms;
+  }
+
+  static setSources(roomId: string, sources: any): void {
+    const currentRoom = Room.findRoom(roomId);
+    if (!currentRoom) {
+      console.log('Ошибка установки источников. Комната не найдена');
+      return;
+    }
+    currentRoom.currentSources = sources;
+  }
+  static getSources(roomId: string): void {
+    const currentRoom = Room.findRoom(roomId);
+    if (!currentRoom) {
+      console.log('Ошибка получения источников. Комната не найдена');
+      return;
+    }
+    return currentRoom.currentSources;
   }
 }

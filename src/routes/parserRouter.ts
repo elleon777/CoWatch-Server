@@ -3,5 +3,6 @@ import { parserController } from '../controllers/parserController';
 
 export const parserRouter = express.Router();
 
-parserRouter.post('/', parserController.getSourcesFromURL);
+parserRouter.get('/', parserController.getSourcesFromURL);
+// parserRouter.get('/subtitles', parserController.downloadSubtitles);
 

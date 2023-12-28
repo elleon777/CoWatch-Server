@@ -7,7 +7,6 @@ export class User {
   id: string;
   username: string;
   roomRole: RoomRole | null;
-  currentTime: number | null;
   currentRoomId: string | null;
   readyPlay: boolean;
 
@@ -15,7 +14,6 @@ export class User {
     this.id = id;
     this.username = username;
     this.roomRole = null;
-    this.currentTime = null;
     this.currentRoomId = null;
     this.readyPlay = false;
   }
@@ -40,7 +38,7 @@ export class User {
     }
   }
 
-  static setRoom(userId: string, roomId: string) {
+  static setRoom(userId: string, roomId: string | null) {
     const currentUser = User.findUser(userId);
     if (currentUser) {
       currentUser.currentRoomId = roomId;
@@ -71,6 +69,34 @@ export class User {
       currentUser.roomRole = RoomRole.Host;
     }
     console.log('Роль обновлена', currentUser);
+  }
+
+  static getRoomRole(userId: string): RoomRole | undefined {
+    const currentUser = User.findUser(userId);
+    if (!currentUser || !currentUser?.roomRole) {
+      return;
+    }
+    return currentUser.roomRole;
+  }
+  static removeRoomRole(userId: string): void {
+    const currentUser = User.findUser(userId);
+    if (!currentUser || !currentUser?.roomRole) {
+      return;
+    }
+    currentUser.roomRole = null;
+  }
+
+  static passHostRole(roomId: string): void {
+    const roomUsers = User.findUsersFromRoom(roomId);
+    // console.log('roomUsers', roomUsers);
+    const isHost = roomUsers.some((user) => user.roomRole === RoomRole.Host);
+    if (isHost || roomUsers.length === 0) {
+      return;
+    }
+    const newHostUser = User.findUser(roomUsers[0].id);
+    if (newHostUser) {
+      newHostUser.roomRole = RoomRole.Host;
+    }
   }
 
   static getUsers() {

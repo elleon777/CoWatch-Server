@@ -1,25 +1,35 @@
 import * as socketio from 'socket.io';
+import { TUser } from '../utils/types';
+import { RoomRole } from '../utils/enums';
+import { User } from '../models/User';
+
 export const registerPlayerHandlers = (socket: socketio.Socket, io: socketio.Server) => {
-
-  
-
-  socket.on('player:readyPlay', () => {
-
-    // socket.broadcast.to(roomId).emit();
-  });
-
-  socket.on('player:sendTime', (obj: { currentTime: any; roomId: any }) => {
+  // TODO:
+  // 1: переработать управления видео не у хоста
+  const syncTime = (obj: { currentTime: any; roomId: string }) => {
     const { currentTime, roomId } = obj;
-    socket.broadcast.to(roomId).emit('sync', currentTime);
-  });
-  socket.on('player:play', (roomId: string) => {
-    socket.broadcast.to(roomId).emit('syncPlay');
-  });
-  socket.on('player:pause', (roomId: string) => {
-    socket.broadcast.to(roomId).emit('syncPause');
-  });
-  socket.on('player:requestVideo', (obj: { src: string; roomId: string }) => {
-    const { src, roomId } = obj;
-    io.to(roomId).emit('syncRequestVideo', src);
-  });
+    if (User.getRoomRole(socket.id) === RoomRole.Host) {
+      io.to(roomId).emit('player:syncTime', currentTime);
+    }
+  };
+  const syncPlay = (roomId: string) => {
+    socket.broadcast.to(roomId).emit('player:syncPlay');
+  };
+  const syncPause = (roomId: string) => {
+    socket.broadcast.to(roomId).emit('player:syncPause');
+  };
+  const syncUsersTime = (obj: { roomId: string; currentUser: TUser; currentTime: any }) => {
+    const { roomId, currentUser, currentTime } = obj;
+    io.to(roomId).emit('player:userTime', { currentUser, currentTime });
+  };
+
+  const syncUpdateSources = (roomId: string) => {
+    io.to(roomId).emit('player:updateSources');
+  };
+
+  socket.on('player:syncTime', syncTime);
+  socket.on('player:play', syncPlay);
+  socket.on('player:pause', syncPause);
+  socket.on('player:userTime', syncUsersTime);
+  socket.on('player:updateSources', syncUpdateSources);
 };

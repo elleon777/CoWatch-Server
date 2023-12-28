@@ -1,5 +1,6 @@
 import puppeteer from 'puppeteer';
-const { JSDOM } = require('jsdom');
+import { JSDOM } from 'jsdom';
+import * as https from 'https';
 
 export class Parser {
   private url: string;
@@ -12,7 +13,7 @@ export class Parser {
   private async parseFromUrl(url: string) {
     const browser = await puppeteer.launch({ headless: true });
     const page = await browser.newPage();
-    await page.goto(url);
+    await page.goto(url, { timeout: 300000 });
     await page.waitForSelector('video[src]');
     const result = await page.evaluate(() => {
       return document.querySelector('video[src]')?.outerHTML;
@@ -44,7 +45,7 @@ export class Parser {
       const trackTag = dom.window.document.querySelector('track');
 
       const attributesObj: any = {};
-      for (let attribute of trackTag.attributes) {
+      for (let attribute of trackTag?.attributes!) {
         attributesObj[attribute.name] = attribute.value;
       }
       if (!attributesObj.src.includes('https')) {
@@ -57,14 +58,43 @@ export class Parser {
     }
   }
 
+  private async getSubtitles(url: string) {
+    return new Promise((resolve, reject) => {
+      const request = https.get(url, (response) => {
+        response.setEncoding('utf8');
+        let responceBody = '';
+
+        response.on('data', (chunk) => {
+          responceBody += chunk;
+        });
+
+        response.on('end', () => {
+          console.log('end', responceBody);
+          resolve(responceBody);
+        });
+      });
+      request.on('error', (err) => {
+        reject(err);
+      });
+    });
+  }
+
   async parse() {
+    console.log('Получаю данные...');
     const htmlString = await this.parseFromUrl(this.url);
     if (!htmlString) {
       console.log('Не удалось получить данные');
       return;
     }
-    const sourses = this.createObjSources(htmlString);
+    console.log('Данные получены');
+    const sources = this.createObjSources(htmlString);
     const subtitles = this.createObjSubtitle(htmlString);
-    return { sourses, subtitles };
+    if (subtitles) {
+      console.log('Получаю субтитры...');
+      const subtitleVVT = await this.getSubtitles(subtitles.src);
+      console.log('Субтитры получены');
+      return { sources, subtitles, subtitleVVT };
+    }
+    return { sources };
   }
 }
