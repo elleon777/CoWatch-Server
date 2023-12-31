@@ -13,8 +13,7 @@ export class Parser {
   private async parseFromUrl(url: string) {
     const browser = await puppeteer.launch({
       headless: true,
-      executablePath:
-        '/opt/render/.cache/puppeteer/chrome/',
+      executablePath: process.env.PUPPETEER_EXECUTABLE_PATH,
       args: ['--disable-gpu', '--disable-setuid-sandbox', '--no-sandbox', '--no-zygote'],
     });
     const page = await browser.newPage();
