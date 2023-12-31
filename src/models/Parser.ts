@@ -11,7 +11,12 @@ export class Parser {
   }
 
   private async parseFromUrl(url: string) {
-    const browser = await puppeteer.launch({ headless: true });
+    const browser = await puppeteer.launch({
+      headless: true,
+      executablePath:
+        '/opt/render/.cache/puppeteer/chrome/linux-119.0.6045.105/chrome-linux64/chrome',
+      args: ['--disable-gpu', '--disable-setuid-sandbox', '--no-sandbox', '--no-zygote'],
+    });
     const page = await browser.newPage();
     await page.goto(url, { timeout: 300000 });
     await page.waitForSelector('video[src]');
