@@ -29,7 +29,8 @@
   "scripts": {
     "test": "jest",
     "dev": "nodemon --exec ts-node --esm ./src/app.ts",
-    "build": "tsc --project ./"
+    "build": "tsc --project ./",
+    "start": "ts-node --esm ./src/app.ts"
   },
   "author": "",
   "license": "ISC"

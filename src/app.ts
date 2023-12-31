@@ -22,10 +22,6 @@ const io: socketio.Server = new socketio.Server(server, {
 app.use(bodyParser.json());
 app.use(cors());
 
-// https://www.geeksforgeeks.org/how-to-manage-users-in-socket-io-in-node-js/
-
-export let users: TUser[] = [];
-
 app.use("/api/rooms", roomRouter)
 app.use("/api/parser", parserRouter)
 

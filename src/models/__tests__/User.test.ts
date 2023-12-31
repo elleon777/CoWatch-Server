@@ -33,25 +33,24 @@ describe('User model', () => {
 
   test('set RoomRole on User when he join', () => {
     User.setRoom('1', '1');
-    User.setRoomRole('1')
+    User.setRoomRole('1');
 
     User.setRoom('2', '1');
-    User.setRoomRole('2')
-
+    User.setRoomRole('2');
 
     expect(User.getUsers()).toEqual(users);
-  })
+  });
   test('passHostRole when host is leaving', () => {
     User.setRoom('1', '1');
-    User.setRoomRole('1')
+    User.setRoomRole('1');
 
     User.setRoom('2', '1');
-    User.setRoomRole('2')
+    User.setRoomRole('2');
 
     users[1].roomRole = RoomRole.Host;
     User.leaveUser('1');
-    User.passHostRole('1')
+    User.passHostRole('1');
 
     expect(User.getUsers()).toEqual([users[1]]);
-  })
+  });
 });
