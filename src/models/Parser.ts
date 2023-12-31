@@ -14,7 +14,7 @@ export class Parser {
     const browser = await puppeteer.launch({
       headless: true,
       executablePath:
-        '/opt/render/.cache/puppeteer/chrome/linux-119.0.6045.105/chrome-linux64/chrome',
+        '/opt/render/.cache/puppeteer/chrome/',
       args: ['--disable-gpu', '--disable-setuid-sandbox', '--no-sandbox', '--no-zygote'],
     });
     const page = await browser.newPage();
